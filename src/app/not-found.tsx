@@ -1,6 +1,7 @@
+'use client'
+
 import Link from 'next/link'
 import { Home, Search, ArrowLeft } from 'lucide-react'
-import Button from '@/components/ui/Button'
 
 export default function NotFound() {
   return (
@@ -23,27 +24,26 @@ export default function NotFound() {
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/">
-              <Button className="w-full sm:w-auto flex items-center justify-center">
+              <button className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 gradient-primary text-white hover:scale-105 rounded-xl font-semibold transition-all duration-300">
                 <Home className="w-4 h-4 mr-2" />
                 Go Home
-              </Button>
+              </button>
             </Link>
             
             <Link href="/tests">
-              <Button variant="secondary" className="w-full sm:w-auto flex items-center justify-center">
+              <button className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 glass text-gray-300 border border-white/10 hover:bg-white/10 rounded-xl font-semibold transition-all duration-300">
                 <Search className="w-4 h-4 mr-2" />
                 Browse Tests
-              </Button>
+              </button>
             </Link>
             
-            <Button
-              variant="ghost"
+            <button
               onClick={() => window.history.back()}
-              className="w-full sm:w-auto flex items-center justify-center"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 glass text-gray-300 border border-white/10 hover:bg-white/10 rounded-xl font-semibold transition-all duration-300"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Go Back
-            </Button>
+            </button>
           </div>
         </div>
       </div>

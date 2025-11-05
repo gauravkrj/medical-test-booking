@@ -22,6 +22,8 @@ export default function LoginPage() {
         return 'Incorrect password. Please try again or use "Forgot password?" to reset.'
       case 'EMAIL_AND_PASSWORD_REQUIRED':
         return 'Please enter both email and password.'
+      case 'CredentialsSignin':
+        return 'Invalid email or password. Please try again.'
       default:
         return 'An error occurred. Please try again.'
     }

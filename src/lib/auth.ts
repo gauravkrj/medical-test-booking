@@ -1,9 +1,10 @@
-import NextAuth, { NextAuthOptions } from 'next-auth'
+import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
+import type { NextAuthConfig } from 'next-auth'
 
-export const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthConfig = {
   providers: [
     CredentialsProvider({
       name: 'Email & Password',
@@ -12,38 +13,38 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('EMAIL_AND_PASSWORD_REQUIRED')
+          return null
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email as string },
         })
 
         // Check if email exists
         if (!user) {
-          throw new Error('EMAIL_NOT_FOUND')
+          return null
         }
 
         // Check if user has password (for accounts created via other methods)
         if (!user.password) {
-          throw new Error('EMAIL_NOT_FOUND')
+          return null
         }
 
         // Verify password
-        const isValid = await bcrypt.compare(credentials.password, user.password)
+        const isValid = await bcrypt.compare(credentials.password as string, user.password)
 
         if (!isValid) {
-          throw new Error('INVALID_PASSWORD')
+          return null
         }
 
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role,
-        }
+          role: user.role as string,
+        } as any
       },
     }),
   ],

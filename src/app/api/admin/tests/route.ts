@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { Prisma } from '@prisma/client'
 import { adminRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit'
-import { sanitizeString, sanitizeNumber, sanitizeHTML } from '@/lib/sanitize'
+import { sanitizeString, sanitizeNumber, sanitizeInteger, sanitizeHTML } from '@/lib/sanitize'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -115,12 +115,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate and sanitize FAQs
-    let sanitizedFaqs: Prisma.JsonNull | Prisma.InputJsonValue = Prisma.JsonNull
+    let sanitizedFaqs: Prisma.InputJsonValue | null = null
     if (faqsJson && Array.isArray(faqsJson) && faqsJson.length > 0) {
-      sanitizedFaqs = faqsJson.map((faq: any) => ({
+      const filtered = faqsJson.map((faq: any) => ({
         question: sanitizeString(faq.question || ''),
         answer: sanitizeString(faq.answer || ''),
       })).filter((faq: any) => faq.question && faq.answer)
+      sanitizedFaqs = filtered.length > 0 ? filtered : null
     }
 
     const test = await prisma.test.create({
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
         preparation,
         why,
         interpretations,
-        faqsJson: sanitizedFaqs,
+        faqsJson: sanitizedFaqs ?? Prisma.JsonNull,
       },
     })
 

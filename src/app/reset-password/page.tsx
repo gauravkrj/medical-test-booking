@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const params = useSearchParams()
   const router = useRouter()
   const token = params.get('token') || ''
@@ -65,4 +65,14 @@ export default function ResetPasswordPage() {
   )
 }
 
-
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+        <div className="glass p-8 rounded-2xl">Loading...</div>
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
+  )
+}

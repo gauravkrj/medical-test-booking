@@ -64,22 +64,22 @@ export default function AdminBookingsPage() {
     )
   }
 
-  const statusColors = {
-    PENDING: 'bg-yellow-500/20 text-yellow-400',
-    CONFIRMED: 'bg-blue-500/20 text-blue-400',
-    SAMPLE_COLLECTED: 'bg-purple-500/20 text-purple-400',
-    PROCESSING: 'bg-orange-500/20 text-orange-400',
-    COMPLETED: 'bg-emerald-500/20 text-emerald-400',
-    CANCELLED: 'bg-red-500/20 text-red-400',
+  const statusColors: Record<BookingStatus, string> = {
+    [BookingStatus.PENDING]: 'bg-yellow-500/20 text-yellow-400',
+    [BookingStatus.CONFIRMED]: 'bg-blue-500/20 text-blue-400',
+    [BookingStatus.SAMPLE_COLLECTED]: 'bg-purple-500/20 text-purple-400',
+    [BookingStatus.PROCESSING]: 'bg-orange-500/20 text-orange-400',
+    [BookingStatus.COMPLETED]: 'bg-emerald-500/20 text-emerald-400',
+    [BookingStatus.CANCELLED]: 'bg-red-500/20 text-red-400',
   }
 
   const statusOptions: BookingStatus[] = [
-    'PENDING',
-    'CONFIRMED',
-    'SAMPLE_COLLECTED',
-    'PROCESSING',
-    'COMPLETED',
-    'CANCELLED',
+    BookingStatus.PENDING,
+    BookingStatus.CONFIRMED,
+    BookingStatus.SAMPLE_COLLECTED,
+    BookingStatus.PROCESSING,
+    BookingStatus.COMPLETED,
+    BookingStatus.CANCELLED,
   ]
 
   return (
@@ -112,7 +112,7 @@ export default function AdminBookingsPage() {
               <option value="" className="bg-slate-900 text-gray-300">All Statuses</option>
               {statusOptions.map((status) => (
                 <option key={status} value={status} className="bg-slate-900 text-white">
-                  {status.replace('_', ' ')}
+                  {status.replace(/_/g, ' ')}
                 </option>
               ))}
             </select>
@@ -156,7 +156,7 @@ export default function AdminBookingsPage() {
                       Booking #{booking.id.slice(0, 8)}
                     </h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[booking.status]}`}>
-                      {booking.status.replace('_', ' ')}
+                      {booking.status.replace(/_/g, ' ')}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-400 mb-4">
@@ -176,7 +176,7 @@ export default function AdminBookingsPage() {
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       <span>
-                        {booking.bookingType === 'HOME_COLLECTION' ? 'Home Collection' : 'Clinic Visit'}
+                        {booking.bookingType === BookingType.HOME_COLLECTION ? 'Home Collection' : 'Clinic Visit'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -249,7 +249,7 @@ export default function AdminBookingsPage() {
                   >
                     {statusOptions.map((status) => (
                       <option key={status} value={status} className="bg-slate-900 text-white">
-                        {status.replace('_', ' ')}
+                        {status.replace(/_/g, ' ')}
                       </option>
                     ))}
                   </select>
