@@ -2,13 +2,21 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { Menu, X, User, LogOut, FlaskConical } from 'lucide-react'
 import Image from 'next/image'
 
 export default function Navbar({ labName = 'Lab Test Booking', logoUrl = '' }: { labName?: string; logoUrl?: string }) {
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
   const { data: session } = useSession()
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false })
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <nav className="glass-dark sticky top-0 z-50 border-b border-white/10">
@@ -72,7 +80,7 @@ export default function Navbar({ labName = 'Lab Test Booking', logoUrl = '' }: {
                   <span className="text-gray-200 font-medium">{session.user?.name || session.user?.email}</span>
                 </Link>
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={handleSignOut}
                   className="flex items-center space-x-2 px-4 py-2 glass rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
                 >
                   <LogOut className="w-4 h-4" />
@@ -126,7 +134,7 @@ export default function Navbar({ labName = 'Lab Test Booking', logoUrl = '' }: {
                   <span className="text-gray-200">{session.user?.name || session.user?.email}</span>
                 </Link>
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={handleSignOut}
                   className="w-full flex items-center space-x-2 px-4 py-2 glass rounded-lg text-gray-300 hover:text-white"
                 >
                   <LogOut className="w-4 h-4" />

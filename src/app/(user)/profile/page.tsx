@@ -132,7 +132,9 @@ export default function ProfilePage() {
         })
         // Sign out user after password change and redirect to login
         setTimeout(async () => {
-          await signOut({ callbackUrl: '/login', redirect: true })
+          await signOut({ redirect: false })
+          router.push('/login')
+          router.refresh()
         }, 2000)
       } else {
         setError(data.error || 'Failed to change password')
