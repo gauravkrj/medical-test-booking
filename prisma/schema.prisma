@@ -1,0 +1,162 @@
+// Single-Lab Medical Test Booking System
+// Simplified schema for a single lab with admin panel
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TestType {
+  HOME_TEST
+  CLINIC_TEST
+}
+
+enum BookingType {
+  HOME_COLLECTION
+  CLINIC_VISIT
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  SAMPLE_COLLECTED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  phone         String?
+  password      String
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookings      Booking[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model Test {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?   @db.LongText
+  category      String
+  price         Float
+  duration      Int?      // Duration in days for results
+  testType      TestType  @default(CLINIC_TEST)
+  isActive      Boolean   @default(true)
+  // Rich content sections
+  about         String?   @db.LongText
+  parameters    String?   @db.LongText
+  preparation   String?   @db.LongText
+  why           String?   @db.LongText
+  interpretations String? @db.LongText
+  faqsJson      Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookingItems  BookingItem[]
+
+  @@index([testType])
+  @@index([category])
+  @@index([isActive])
+}
+
+model Booking {
+  id            String      @id @default(cuid())
+  userId        String
+  bookingType   BookingType
+  patientName   String
+  patientAge    Int
+  bookingDate   DateTime?
+  bookingTime   String?     // Time slot (for clinic visits)
+  address       String?     // Full address (required for home collection)
+  city          String
+  state         String?
+  pincode       String?
+  phone         String
+  status        BookingStatus @default(PENDING)
+  prescriptionUrl String?
+  notes         String?
+  totalAmount   Float
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id])
+  items         BookingItem[]
+
+  @@index([userId])
+  @@index([bookingDate])
+  @@index([status])
+  @@index([bookingType])
+}
+
+model BookingItem {
+  id            String    @id @default(cuid())
+  bookingId     String
+  testId        String
+  price         Float
+  booking       Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  test          Test      @relation(fields: [testId], references: [id])
+
+  @@index([bookingId])
+  @@index([testId])
+}
+
+// Site configuration for branding and lab information
+model SiteConfig {
+  id            String    @id @default(cuid())
+  labName       String
+  labAddress    String
+  labCity       String
+  labState      String
+  labPincode    String
+  labPhone      String
+  labEmail      String
+  labLogoUrl    String?
+  primaryColor  String?   // Hex color for branding
+  secondaryColor String?  // Hex color for branding
+  aboutText     String?   @db.LongText
+  termsText     String?   @db.LongText
+  privacyText   String?   @db.LongText
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("site_config")
+}
+
+// Phone OTP requests
+model OtpRequest {
+  id         String   @id @default(cuid())
+  phone      String
+  codeHash   String   // store hashed OTP (bcrypt)
+  expiresAt  DateTime
+  consumed   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([phone])
+  @@index([expiresAt])
+}
+
+// Password reset via email
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  consumed   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
