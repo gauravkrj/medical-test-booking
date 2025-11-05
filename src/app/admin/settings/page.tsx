@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -9,6 +10,7 @@ import { Upload, Save } from 'lucide-react'
 import { SiteConfig } from '@/types'
 
 export default function AdminSettingsPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState<Partial<SiteConfig>>({
@@ -86,7 +88,13 @@ export default function AdminSettingsPage() {
       })
 
       if (res.ok) {
-        alert('Settings saved successfully!')
+        alert('Settings saved successfully! Refreshing page...')
+        // Force a hard refresh to reload layout with new settings
+        router.refresh()
+        // Small delay to ensure database is updated
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
       } else {
         const error = await res.json()
         alert(error.error || 'Failed to save settings')

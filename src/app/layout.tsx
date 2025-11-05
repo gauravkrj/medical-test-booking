@@ -15,12 +15,24 @@ export const metadata: Metadata = {
   description: "Book medical tests online with ease. Fast, reliable, and convenient.",
 };
 
+// Force dynamic rendering to always fetch fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await prisma.siteConfig.findFirst().catch(() => null)
+  // Fetch settings with better error handling
+  let settings = null
+  try {
+    settings = await prisma.siteConfig.findFirst()
+  } catch (error) {
+    console.error('Error fetching site config:', error)
+    // Continue with defaults if database fails
+  }
+  
   const labName = settings?.labName || 'Lab Test Booking'
   const logoUrl = settings?.labLogoUrl || ''
   const primaryColor = settings?.primaryColor || '#059669'

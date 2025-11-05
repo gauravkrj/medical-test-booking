@@ -131,7 +131,12 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(config)
+    // Revalidate the layout cache to force refresh
+    const response = NextResponse.json(config)
+    response.headers.set('Cache-Control', 'no-store, must-revalidate')
+    response.headers.set('X-Revalidated', 'true')
+    
+    return response
   } catch (error) {
     console.error('Error saving settings:', error)
     return NextResponse.json(

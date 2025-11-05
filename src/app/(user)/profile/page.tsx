@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -124,15 +124,15 @@ export default function ProfilePage() {
       const data = await res.json()
 
       if (res.ok) {
-        setSuccess('Password changed successfully!')
+        setSuccess('Password changed successfully! Please sign in again with your new password.')
         setPasswordForm({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         })
-        setTimeout(() => {
-          setSuccess('')
-          setActiveTab('view')
+        // Sign out user after password change and redirect to login
+        setTimeout(async () => {
+          await signOut({ callbackUrl: '/login', redirect: true })
         }, 2000)
       } else {
         setError(data.error || 'Failed to change password')
