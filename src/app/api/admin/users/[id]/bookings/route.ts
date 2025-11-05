@@ -8,7 +8,7 @@ export const runtime = 'nodejs'
 // GET /api/admin/users/[id]/bookings - Get all bookings for a specific user (admin only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -20,7 +20,8 @@ export async function GET(
       )
     }
 
-    const userId = params.id
+    const { id } = await params
+    const userId = id
 
     const bookings = await prisma.booking.findMany({
       where: {
