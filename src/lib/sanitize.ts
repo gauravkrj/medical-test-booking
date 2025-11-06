@@ -1,5 +1,46 @@
 import validator from 'validator'
-import DOMPurify from 'isomorphic-dompurify'
+
+// Server-safe HTML tag removal (no jsdom dependency)
+function stripHtmlTags(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '') // Remove style tags
+    .replace(/<[^>]+>/g, '') // Remove all HTML tags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim()
+}
+
+// Server-safe HTML sanitization (allows specific tags)
+function sanitizeHtmlTags(html: string, allowedTags: string[]): string {
+  // Remove script and style tags first
+  let sanitized = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+
+  // Remove all tags not in allowed list
+  const tagPattern = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi
+  sanitized = sanitized.replace(tagPattern, (match, tagName) => {
+    const lowerTag = tagName.toLowerCase()
+    if (allowedTags.includes(lowerTag)) {
+      // Keep allowed tags but remove attributes
+      return match.replace(/\s+[^>]*/, '')
+    }
+    return '' // Remove disallowed tags
+  })
+
+  // Remove any remaining attributes from allowed tags
+  allowedTags.forEach(tag => {
+    const regex = new RegExp(`<${tag}\\s+[^>]*>`, 'gi')
+    sanitized = sanitized.replace(regex, `<${tag}>`)
+  })
+
+  return sanitized
+}
 
 // Sanitize string input (XSS prevention)
 export function sanitizeString(input: string): string {
@@ -7,10 +48,7 @@ export function sanitizeString(input: string): string {
     return ''
   }
   // Remove HTML tags and sanitize
-  return DOMPurify.sanitize(input, { 
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: []
-  }).trim()
+  return stripHtmlTags(input).trim()
 }
 
 // Sanitize HTML content (for rich text fields)
@@ -18,10 +56,8 @@ export function sanitizeHTML(html: string): string {
   if (typeof html !== 'string') {
     return ''
   }
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-    ALLOWED_ATTR: []
-  })
+  const allowedTags = ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+  return sanitizeHtmlTags(html, allowedTags)
 }
 
 // Validate and sanitize email
