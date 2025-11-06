@@ -41,9 +41,8 @@ export default function NewTestPage() {
         faqsJson: faqs.length > 0 ? faqs : null,
       }
 
-      // Choose endpoint based on host: use legacy on vercel, dedicated route locally
-      const isVercel = typeof window !== 'undefined' && window.location.hostname.endsWith('vercel.app')
-      const endpoint = isVercel ? '/api/admin/tests' : '/api/admin/tests/create'
+      // Use /create route for all environments (works locally, should work on Vercel after proper deploy)
+      const endpoint = '/api/admin/tests/create'
 
       const res = await fetch(endpoint, {
         method: 'POST',
