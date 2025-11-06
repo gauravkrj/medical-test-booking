@@ -26,9 +26,10 @@ export default function UserBookingsPage() {
 
   const fetchBookings = async () => {
     try {
-      const res = await fetch('/api/bookings')
+      const res = await fetch('/api/bookings', { cache: 'no-store' })
       if (res.ok) {
-        const data = await res.json()
+        const payload = await res.json()
+        const data = Array.isArray(payload) ? payload : (payload?.data ?? [])
         if (Array.isArray(data)) {
           setBookings(data)
         }

@@ -120,7 +120,11 @@ export default function BookingConfirmationPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to cancel/request cancellation')
       await fetchBooking()
-      if (data.cancelRequested) alert('Cancellation request sent to admin.')
+      if (data.cancelled) {
+        alert('Booking cancelled successfully.')
+      } else if (data.cancelRequested) {
+        alert('Cancellation request sent to admin.')
+      }
     } catch (err: any) {
       alert(err.message || 'Failed to cancel/request cancellation')
     }
@@ -309,7 +313,7 @@ export default function BookingConfirmationPage() {
               <Button variant="secondary" className="w-full md:w-auto">Book Another Test</Button>
             </Link>
             {/* Edit/Cancel buttons for user */}
-            {booking && booking.bookingType === 'HOME_COLLECTION' && (
+            {booking && booking.bookingType === 'HOME_COLLECTION' && booking.status !== 'CANCELLED' && booking.status !== 'CONFIRMED' && (
               <>
                 {canEdit && (
                   <Button variant="secondary" onClick={() => setEditing(true)} className="w-full md:w-auto">
@@ -322,6 +326,12 @@ export default function BookingConfirmationPage() {
               </>
             )}
           </div>
+
+          {booking.status === 'CONFIRMED' && (
+            <div className="mt-4 p-4 glass rounded-xl border border-yellow-500/30 bg-yellow-500/10 text-sm text-yellow-200">
+              Confirmed bookings cannot be cancelled.
+            </div>
+          )}
         </Card>
 
         {/* Edit Modal */}
