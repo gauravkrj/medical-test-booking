@@ -50,8 +50,15 @@ export default function NewTestPage() {
       if (res.ok) {
         router.push('/admin/tests')
       } else {
-        const error = await res.json()
-        alert(error.error || 'Failed to create test')
+        let message = `Failed to create test (HTTP ${res.status})`
+        try {
+          const error = await res.json()
+          if (error?.error) message = error.error
+        } catch {
+          const text = await res.text()
+          if (text) message = `${message}: ${text.substring(0, 200)}`
+        }
+        alert(message)
       }
     } catch (error) {
       console.error('Error creating test:', error)
