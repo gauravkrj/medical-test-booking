@@ -41,8 +41,8 @@ export default function NewTestPage() {
         faqsJson: faqs.length > 0 ? faqs : null,
       }
 
-      // Use /test-post route (confirmed working on Vercel)
-      const endpoint = '/api/admin/tests/test-post'
+      // Use parent route (already has POST handler with full logic)
+      const endpoint = '/api/admin/tests'
 
       const res = await fetch(endpoint, {
         method: 'POST',
