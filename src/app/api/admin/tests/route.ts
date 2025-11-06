@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/admin/tests - Admin route to create a new test
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     const session = await auth()
 
