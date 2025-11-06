@@ -8,14 +8,13 @@ import { sanitizeString, sanitizeNumber, sanitizeInteger, sanitizeHTML } from '@
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-// OPTIONS /api/admin/tests - CORS/preflight or method probe
+// OPTIONS /api/admin/tests - Allow CORS/preflight and method negotiation
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Allow': 'GET, POST, OPTIONS',
-    },
-  })
+  const res = new NextResponse(null, { status: 204 })
+  res.headers.set('Allow', 'GET, POST, OPTIONS')
+  res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  return res
 }
 
 // GET /api/admin/tests - Admin route to get all tests (including inactive)
