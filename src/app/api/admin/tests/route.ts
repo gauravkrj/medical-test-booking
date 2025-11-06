@@ -99,17 +99,31 @@ export async function POST(request: NextRequest) {
     const interpretations = rawInterpretations ? sanitizeHTML(rawInterpretations) : null
 
     // Validate required fields
-    if (!name || !category || price === null || !testType) {
+    const missing: string[] = []
+    if (!name) missing.push('name')
+    if (!category) missing.push('category')
+    if (price === null) missing.push('price')
+    if (!testType) missing.push('testType')
+
+    if (missing.length > 0) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: `Missing or invalid fields: ${missing.join(', ')}` },
         { status: 400 }
       )
     }
 
     // Validate price
-    if (price <= 0) {
+    if (price !== null && price <= 0) {
       return NextResponse.json(
         { error: 'Price must be greater than 0' },
+        { status: 400 }
+      )
+    }
+
+    // Validate duration if provided
+    if (duration !== null && (duration as number) < 0) {
+      return NextResponse.json(
+        { error: 'Duration must be a positive integer (days)' },
         { status: 400 }
       )
     }
@@ -129,8 +143,8 @@ export async function POST(request: NextRequest) {
         name,
         description,
         category,
-        price,
-        duration,
+        price: (price as number),
+        duration: duration === null ? null : (duration as number),
         testType,
         isActive: Boolean(isActive),
         about,
@@ -143,10 +157,18 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(test, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating test:', error)
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return NextResponse.json(
+          { error: 'A test with this name already exists' },
+          { status: 400 }
+        )
+      }
+    }
     return NextResponse.json(
-      { error: 'Failed to create test' },
+      { error: error?.message || 'Failed to create test' },
       { status: 500 }
     )
   }
