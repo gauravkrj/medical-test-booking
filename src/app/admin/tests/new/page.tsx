@@ -41,8 +41,8 @@ export default function NewTestPage() {
         faqsJson: faqs.length > 0 ? faqs : null,
       }
 
-      // Use /create route for all environments (works locally, should work on Vercel after proper deploy)
-      const endpoint = '/api/admin/tests/create'
+      // Use /new route (same pattern as test-post which works on Vercel)
+      const endpoint = '/api/admin/tests/new'
 
       const res = await fetch(endpoint, {
         method: 'POST',
