@@ -110,139 +110,196 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">User Management</h1>
-        <p className="text-gray-400">View all registered users and their bookings</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">User Management</h1>
+        <p className="text-sm md:text-base text-gray-400">View all registered users and their bookings</p>
       </div>
 
       {users.length === 0 ? (
-        <Card className="p-12 text-center">
-          <User className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">No users found</h3>
+        <Card className="p-8 md:p-12 text-center">
+          <User className="w-12 h-12 md:w-16 md:h-16 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-lg md:text-xl font-semibold text-white mb-2">No users found</h3>
           <p className="text-gray-400">No users have registered yet</p>
         </Card>
       ) : (
-        <Card className="p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/5 border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Email</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Phone</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">User Since</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Bookings</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <div className="text-white font-medium">
-                            {user.name || 'No Name'}
-                          </div>
-                          <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mt-1 ${
-                            user.role === 'ADMIN'
-                              ? 'bg-purple-500/20 text-purple-400'
-                              : 'bg-blue-500/20 text-blue-400'
-                          }`}>
-                            {user.role}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-300">{user.email}</td>
-                    <td className="px-6 py-4 text-gray-300">{user.phone || 'N/A'}</td>
-                    <td className="px-6 py-4 text-gray-300">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium border border-emerald-500/30">
-                        <Package className="w-4 h-4" />
-                        {user._count.bookings}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => fetchUserBookings(user.id)}
-                        className="flex items-center gap-2"
-                      >
-                        <Eye className="w-4 h-4" />
-                        View More
-                      </Button>
-                    </td>
+        <>
+          {/* Desktop Table View */}
+          <Card className="p-0 overflow-hidden hidden md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5 border-b border-white/10">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Email</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Phone</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">User Since</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Bookings</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {users.map((user) => (
+                    <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-white font-medium">
+                              {user.name || 'No Name'}
+                            </div>
+                            <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full mt-1 ${
+                              user.role === 'ADMIN'
+                                ? 'bg-purple-500/20 text-purple-400'
+                                : 'bg-blue-500/20 text-blue-400'
+                            }`}>
+                              {user.role}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-300">{user.email}</td>
+                      <td className="px-6 py-4 text-gray-300">{user.phone || 'N/A'}</td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium border border-emerald-500/30">
+                          <Package className="w-4 h-4" />
+                          {user._count.bookings}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => fetchUserBookings(user.id)}
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View More
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {users.map((user) => (
+              <Card key={user.id} className="p-4">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-white font-semibold truncate">{user.name || 'No Name'}</h3>
+                      <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full flex-shrink-0 ${
+                        user.role === 'ADMIN'
+                          ? 'bg-purple-500/20 text-purple-400'
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-400 truncate">{user.email}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Phone:</span>
+                    <span className="text-white">{user.phone || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">User Since:</span>
+                    <span className="text-white">{new Date(user.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Bookings:</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-medium border border-emerald-500/30">
+                      <Package className="w-3 h-3" />
+                      {user._count.bookings}
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => fetchUserBookings(user.id)}
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  View More
+                </Button>
+              </Card>
+            ))}
           </div>
-        </Card>
+        </>
       )}
 
       {/* Bookings Modal */}
       {selectedUserId && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-white/10">
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4">
+          <div className="bg-slate-900 rounded-xl md:rounded-2xl max-w-5xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col border border-white/10">
+            <div className="p-4 md:p-6 border-b border-white/10 flex items-center justify-between">
+              <div className="flex-1 min-w-0 pr-2">
+                <h2 className="text-lg md:text-2xl font-bold text-white truncate">
                   {selectedUser?.name || 'User'}'s Bookings
                 </h2>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="text-gray-400 text-xs md:text-sm mt-1 truncate">
                   {selectedUser?.email} • {userBookings.length} booking{userBookings.length !== 1 ? 's' : ''}
                 </p>
               </div>
               <button
                 onClick={closeBookingsModal}
-                className="p-2 glass rounded-lg hover:bg-white/10 transition-colors"
+                className="p-2 glass rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
               >
                 <X className="w-5 h-5 text-gray-300" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
               {loadingBookings ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
               ) : userBookings.length === 0 ? (
-                <div className="text-center py-12">
-                  <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">No bookings found</h3>
-                  <p className="text-gray-400">This user hasn't made any bookings yet</p>
+                <div className="text-center py-8 md:py-12">
+                  <Package className="w-12 h-12 md:w-16 md:h-16 text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2">No bookings found</h3>
+                  <p className="text-sm md:text-base text-gray-400">This user hasn't made any bookings yet</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {userBookings.map((booking) => (
-                    <Card key={booking.id} className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-bold text-white">Booking #{booking.id.slice(0, 8)}</h3>
-                            <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadge(booking.status)}`}>
+                    <Card key={booking.id} className="p-4 md:p-6">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className="text-base md:text-lg font-bold text-white">Booking #{booking.id.slice(0, 8)}</h3>
+                            <span className={`px-2 md:px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadge(booking.status)}`}>
                               {booking.status}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-xs md:text-sm text-gray-400">
                             {new Date(booking.createdAt).toLocaleString()}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <div className="text-emerald-400 font-bold text-lg">
+                        <div className="text-left md:text-right">
+                          <div className="text-emerald-400 font-bold text-base md:text-lg">
                             ₹{booking.totalAmount.toFixed(2)}
                           </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4">
                         <div>
                           <p className="text-xs text-gray-400 mb-1">Patient Name</p>
                           <p className="text-white font-medium">{booking.patientName}</p>

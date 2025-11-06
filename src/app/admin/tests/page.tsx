@@ -77,48 +77,48 @@ export default function AdminTestsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Test Management</h1>
-          <p className="text-gray-400">Manage all available tests</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Test Management</h1>
+          <p className="text-sm md:text-base text-gray-400">Manage all available tests</p>
         </div>
-        <Link href="/admin/tests/new">
-          <Button>
-            <Plus className="w-5 h-5 mr-2" />
+        <Link href="/admin/tests/new" className="w-full md:w-auto">
+          <Button className="w-full md:w-auto">
+            <Plus className="w-4 h-4 md:w-5 md:h-5 mr-2" />
             Add New Test
           </Button>
         </Link>
       </div>
 
       {tests.length === 0 ? (
-        <Card className="p-12 text-center">
-          <FlaskConical className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">No tests found</h3>
-          <p className="text-gray-400 mb-6">Get started by adding your first test</p>
+        <Card className="p-8 md:p-12 text-center">
+          <FlaskConical className="w-12 h-12 md:w-16 md:h-16 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-lg md:text-xl font-semibold text-white mb-2">No tests found</h3>
+          <p className="text-sm md:text-base text-gray-400 mb-6">Get started by adding your first test</p>
           <Link href="/admin/tests/new">
             <Button>Create First Test</Button>
           </Link>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {tests.map((test) => (
-            <Card key={test.id} className="p-6">
+            <Card key={test.id} className="p-4 md:p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-bold text-white">{test.name}</h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h3 className="text-lg md:text-xl font-bold text-white truncate">{test.name}</h3>
                     {test.isActive ? (
-                      <span className="px-2 py-1 text-xs font-semibold bg-emerald-500/20 text-emerald-400 rounded-full">
+                      <span className="px-2 py-1 text-xs font-semibold bg-emerald-500/20 text-emerald-400 rounded-full flex-shrink-0">
                         Active
                       </span>
                     ) : (
-                      <span className="px-2 py-1 text-xs font-semibold bg-gray-500/20 text-gray-400 rounded-full">
+                      <span className="px-2 py-1 text-xs font-semibold bg-gray-500/20 text-gray-400 rounded-full flex-shrink-0">
                         Inactive
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-gray-400 mb-2">{test.category}</p>
-                  <p className="text-2xl font-bold text-gradient">₹{test.price}</p>
+                  <p className="text-xl md:text-2xl font-bold text-gradient">₹{test.price}</p>
                 </div>
               </div>
 
@@ -130,8 +130,8 @@ export default function AdminTestsPage() {
 
               <div className="flex items-center gap-2 pt-4 border-t border-white/10">
                 <Link href={`/admin/tests/${test.id}/edit`} className="flex-1">
-                  <Button variant="secondary" size="sm" className="w-full">
-                    <Edit className="w-4 h-4 mr-2" />
+                  <Button variant="secondary" size="sm" className="w-full text-xs md:text-sm">
+                    <Edit className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                     Edit
                   </Button>
                 </Link>
@@ -140,6 +140,7 @@ export default function AdminTestsPage() {
                   size="sm"
                   onClick={() => handleToggleActive(test)}
                   title={test.isActive ? 'Deactivate' : 'Activate'}
+                  className="p-2"
                 >
                   {test.isActive ? (
                     <EyeOff className="w-4 h-4" />
@@ -151,6 +152,7 @@ export default function AdminTestsPage() {
                   variant="danger"
                   size="sm"
                   onClick={() => handleDelete(test.id)}
+                  className="p-2"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
