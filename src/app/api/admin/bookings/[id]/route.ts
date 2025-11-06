@@ -113,6 +113,13 @@ export async function PATCH(
     const updateData: any = {}
     if (status) {
       updateData.status = status
+      // If approving cancellation, record review metadata
+      if (status === 'CANCELLED') {
+        updateData.cancelReviewedAt = new Date()
+        updateData.cancelReviewedBy = session.user.id as string
+        // Clear request flag if it existed
+        updateData.cancelRequested = false
+      }
     }
     if (rawNotes !== undefined) {
       updateData.notes = rawNotes ? sanitizeString(rawNotes) : null

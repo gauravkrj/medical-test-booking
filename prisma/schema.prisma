@@ -88,6 +88,11 @@ model Booking {
   status        BookingStatus @default(PENDING)
   prescriptionUrl String?
   notes         String?
+  // Cancellation workflow
+  cancelRequested  Boolean    @default(false)
+  cancelReason     String?
+  cancelReviewedAt DateTime?
+  cancelReviewedBy String?
   totalAmount   Float
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import Input from '@/components/ui/Input'
 import { CheckCircle, Calendar, MapPin, Phone, FileText, ArrowLeft } from 'lucide-react'
 import { Booking } from '@/types'
 
@@ -16,6 +17,20 @@ export default function BookingConfirmationPage() {
   const bookingId = params.id as string
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editForm, setEditForm] = useState({
+    patientName: '',
+    patientAge: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    phone: '',
+    bookingDate: '',
+    bookingTime: '',
+    notes: '',
+  })
 
   useEffect(() => {
     if (bookingId) {
@@ -29,6 +44,18 @@ export default function BookingConfirmationPage() {
       if (res.ok) {
         const data = await res.json()
         setBooking(data)
+        setEditForm({
+          patientName: data.patientName || '',
+          patientAge: String(data.patientAge || ''),
+          address: data.address || '',
+          city: data.city || '',
+          state: data.state || '',
+          pincode: data.pincode || '',
+          phone: data.phone || '',
+          bookingDate: data.bookingDate ? new Date(data.bookingDate).toISOString().slice(0, 10) : '',
+          bookingTime: data.bookingTime || '',
+          notes: data.notes || '',
+        })
       } else {
         router.push('/bookings')
       }
@@ -37,6 +64,65 @@ export default function BookingConfirmationPage() {
       router.push('/bookings')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const canEdit = booking && booking.bookingType === 'HOME_COLLECTION' && !['CONFIRMED','COMPLETED','CANCELLED'].includes(booking.status)
+  const canCancelDirect = booking && !['CONFIRMED','SAMPLE_COLLECTED','PROCESSING','COMPLETED','CANCELLED'].includes(booking.status)
+
+  const submitEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!booking) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/bookings/${booking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: editForm.patientName,
+          patientAge: Number(editForm.patientAge),
+          address: editForm.address,
+          city: editForm.city,
+          state: editForm.state,
+          pincode: editForm.pincode,
+          phone: editForm.phone,
+          bookingDate: editForm.bookingDate || undefined,
+          bookingTime: editForm.bookingTime,
+          notes: editForm.notes,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to update booking')
+      setEditing(false)
+      await fetchBooking()
+    } catch (err: any) {
+      alert(err.message || 'Failed to update booking')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancel = async () => {
+    if (!booking) return
+    try {
+      let reason: string | null = null
+      const needsRequest = ['CONFIRMED','SAMPLE_COLLECTED','PROCESSING','COMPLETED'].includes(booking.status)
+      if (needsRequest) {
+        reason = window.prompt('Provide a reason for cancellation (optional):') || ''
+      } else if (!window.confirm('Are you sure you want to cancel this booking?')) {
+        return
+      }
+      const res = await fetch(`/api/bookings/${booking.id}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to cancel/request cancellation')
+      await fetchBooking()
+      if (data.cancelRequested) alert('Cancellation request sent to admin.')
+    } catch (err: any) {
+      alert(err.message || 'Failed to cancel/request cancellation')
     }
   }
 
@@ -215,15 +301,57 @@ export default function BookingConfirmationPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-4 pt-6 border-t border-white/10">
-            <Link href="/bookings" className="flex-1">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 pt-6 border-t border-white/10">
+            <Link href="/bookings" className="md:flex-1">
               <Button className="w-full">View All Bookings</Button>
             </Link>
             <Link href="/tests">
-              <Button variant="secondary">Book Another Test</Button>
+              <Button variant="secondary" className="w-full md:w-auto">Book Another Test</Button>
             </Link>
+            {/* Edit/Cancel buttons for user */}
+            {booking && booking.bookingType === 'HOME_COLLECTION' && (
+              <>
+                {canEdit && (
+                  <Button variant="secondary" onClick={() => setEditing(true)} className="w-full md:w-auto">
+                    Edit Booking
+                  </Button>
+                )}
+                <Button variant="danger" onClick={handleCancel} className="w-full md:w-auto">
+                  {canCancelDirect ? 'Cancel Booking' : 'Request Cancellation'}
+                </Button>
+              </>
+            )}
           </div>
         </Card>
+
+        {/* Edit Modal */}
+        {editing && booking && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl p-6">
+              <h3 className="text-xl font-bold text-white mb-4">Edit Booking</h3>
+              <form onSubmit={submitEdit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input label="Patient Name" value={editForm.patientName} onChange={(e) => setEditForm({ ...editForm, patientName: e.target.value })} />
+                <Input label="Patient Age" type="number" value={editForm.patientAge} onChange={(e) => setEditForm({ ...editForm, patientAge: e.target.value })} />
+                <Input label="Phone" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+                <Input label="Pincode" value={editForm.pincode} onChange={(e) => setEditForm({ ...editForm, pincode: e.target.value })} />
+                <Input label="City" value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} />
+                <Input label="State" value={editForm.state} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} />
+                <div className="md:col-span-2">
+                  <Input label="Address" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
+                </div>
+                <Input label="Preferred Date" type="date" value={editForm.bookingDate} onChange={(e) => setEditForm({ ...editForm, bookingDate: e.target.value })} />
+                <Input label="Preferred Time" value={editForm.bookingTime} onChange={(e) => setEditForm({ ...editForm, bookingTime: e.target.value })} />
+                <div className="md:col-span-2">
+                  <Input label="Notes" value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
+                </div>
+                <div className="md:col-span-2 flex flex-col md:flex-row gap-3 justify-end pt-2">
+                  <Button type="button" variant="ghost" onClick={() => setEditing(false)} className="w-full md:w-auto">Close</Button>
+                  <Button type="submit" loading={saving} className="w-full md:w-auto">Save Changes</Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
