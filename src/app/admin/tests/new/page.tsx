@@ -41,7 +41,7 @@ export default function NewTestPage() {
         faqsJson: faqs.length > 0 ? faqs : null,
       }
 
-      const res = await fetch('/api/admin/tests', {
+      const res = await fetch('/api/admin/tests/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
