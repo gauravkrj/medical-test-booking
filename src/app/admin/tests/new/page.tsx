@@ -51,12 +51,18 @@ export default function NewTestPage() {
         router.push('/admin/tests')
       } else {
         let message = `Failed to create test (HTTP ${res.status})`
+        const ct = res.headers.get('content-type') || ''
         try {
-          const error = await res.json()
-          if (error?.error) message = error.error
-        } catch {
-          const text = await res.text()
-          if (text) message = `${message}: ${text.substring(0, 200)}`
+          if (ct.includes('application/json')) {
+            const error = await res.json()
+            if (error?.error) message = error.error
+          } else {
+            const text = await res.text()
+            if (text) message = `${message}: ${text.substring(0, 200)}`
+          }
+        } catch {}
+        if (res.status === 405) {
+          message = 'Method not allowed. Please ensure you are logged in as ADMIN and try again.'
         }
         alert(message)
       }
