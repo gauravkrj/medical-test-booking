@@ -41,7 +41,11 @@ export default function NewTestPage() {
         faqsJson: faqs.length > 0 ? faqs : null,
       }
 
-      const res = await fetch('/api/admin/tests/create', {
+      // Choose endpoint based on host: use legacy on vercel, dedicated route locally
+      const isVercel = typeof window !== 'undefined' && window.location.hostname.endsWith('vercel.app')
+      const endpoint = isVercel ? '/api/admin/tests' : '/api/admin/tests/create'
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -61,9 +65,6 @@ export default function NewTestPage() {
             if (text) message = `${message}: ${text.substring(0, 200)}`
           }
         } catch {}
-        if (res.status === 405) {
-          message = 'Method not allowed. Please ensure you are logged in as ADMIN and try again.'
-        }
         alert(message)
       }
     } catch (error) {
