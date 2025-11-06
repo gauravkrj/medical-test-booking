@@ -7,6 +7,7 @@ import { sanitizeString, sanitizeNumber, sanitizeInteger, sanitizeHTML } from '@
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const maxDuration = 30
 
 // OPTIONS /api/admin/tests - Allow CORS/preflight and method negotiation
 export async function OPTIONS() {
