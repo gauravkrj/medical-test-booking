@@ -32,8 +32,8 @@ export default function Navbar({ labName = 'Lab Test Booking', logoUrl = '' }: {
                 )}
               </div>
             </div>
-            <div className="flex flex-col max-w-[140px] md:max-w-none">
-              <span className="text-base md:text-2xl font-bold text-gradient truncate">
+            <div className="flex flex-col">
+              <span className="text-base md:text-2xl font-bold text-gradient">
                 {labName}
               </span>
               <span className="hidden md:block text-xs text-gray-400 -mt-1">
