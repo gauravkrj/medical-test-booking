@@ -24,19 +24,19 @@ export default function Navbar({ labName = 'Lab Test Booking', logoUrl = '' }: {
         <div className="flex justify-between items-center h-20">
           <Link href={session?.user?.role === 'ADMIN' ? '/admin/dashboard' : '/'} className="flex items-center space-x-3 group">
             <div className="relative">
-              <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+              <div className="w-10 h-10 md:w-12 md:h-12 gradient-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
                 {logoUrl ? (
-                  <Image src={logoUrl} alt={labName} width={48} height={48} className="object-cover w-12 h-12" />
+                  <Image src={logoUrl} alt={labName} width={48} height={48} className="object-cover w-10 h-10 md:w-12 md:h-12" />
                 ) : (
-                  <FlaskConical className="w-6 h-6 text-white" />
+                  <FlaskConical className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 )}
               </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-gradient">
+            <div className="flex flex-col max-w-[140px] md:max-w-none">
+              <span className="text-base md:text-2xl font-bold text-gradient truncate">
                 {labName}
               </span>
-              <span className="text-xs text-gray-400 -mt-1">
+              <span className="hidden md:block text-xs text-gray-400 -mt-1">
                 {session?.user?.role === 'ADMIN' ? 'Admin Dashboard' : 'Book Tests Online'}
               </span>
             </div>
