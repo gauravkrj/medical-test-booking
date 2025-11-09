@@ -135,14 +135,16 @@ export const ApiErrors = {
  * Handle errors in API routes with consistent format
  */
 export function handleApiError(error: unknown): NextResponse<ApiErrorResponse> {
-  // Don't expose internal errors in production
+  // Always log errors for debugging (but don't expose to client in production)
   const isDevelopment = process.env.NODE_ENV === 'development'
 
   if (error instanceof Error) {
-    // Log error in development
-    if (isDevelopment) {
-      console.error('API Error:', error)
-    }
+    // Always log error (including stack trace) for debugging
+    console.error('API Error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    })
 
     // Check for known error types
     if (error.message.includes('not found') || error.message.includes('Not Found')) {
@@ -153,13 +155,23 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorResponse> {
       return ApiErrors.VALIDATION_ERROR(isDevelopment ? { originalError: error.message } : undefined)
     }
 
+    // Check for Prisma errors
+    if (error.name === 'PrismaClientKnownRequestError') {
+      console.error('Prisma Error:', error)
+      // Don't expose database errors to client
+      return ApiErrors.INTERNAL_SERVER_ERROR(
+        isDevelopment ? error.message : undefined
+      )
+    }
+
     // Return generic error
     return ApiErrors.INTERNAL_SERVER_ERROR(
       isDevelopment ? error.message : undefined
     )
   }
 
-  // Unknown error type
+  // Unknown error type - log it
+  console.error('Unknown API Error:', error)
   return ApiErrors.INTERNAL_SERVER_ERROR()
 }
 

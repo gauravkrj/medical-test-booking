@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/mobile-auth'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -11,9 +11,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
+    const user = await getAuthenticatedUser(request)
 
-    if (!session || !session.user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -49,7 +49,7 @@ export async function GET(
     }
 
     // Users can only view their own bookings (unless admin)
-    if (session.user.role !== 'ADMIN' && booking.userId !== session.user.id) {
+    if (user.role !== 'ADMIN' && booking.userId !== user.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -72,8 +72,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
-    if (!session || !session.user) {
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { id } = await params
@@ -82,7 +82,7 @@ export async function PATCH(
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
     }
-    if (booking.userId !== session.user.id && session.user.role !== 'ADMIN') {
+    if (booking.userId !== user.id && user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -149,8 +149,8 @@ export async function POST(
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
-    const session = await auth()
-    if (!session || !session.user) {
+    const user = await getAuthenticatedUser(request)
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -161,7 +161,7 @@ export async function POST(
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
     }
-    if (booking.userId !== session.user.id && session.user.role !== 'ADMIN') {
+    if (booking.userId !== user.id && user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

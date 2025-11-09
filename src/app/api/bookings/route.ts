@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+import { getAuthenticatedUser } from '@/lib/mobile-auth'
 import { bookingRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit'
 import { sanitizeString, sanitizePhone, sanitizeInteger, sanitizeURL } from '@/lib/sanitize'
 import { ApiErrors, createSuccessResponse, handleApiError } from '@/lib/api-error'
@@ -13,15 +13,15 @@ export const runtime = 'nodejs'
 // GET /api/bookings - Get current user's bookings
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
+    const user = await getAuthenticatedUser(request)
 
-    if (!session || !session.user) {
+    if (!user) {
       return ApiErrors.UNAUTHORIZED('You must be logged in to view your bookings')
     }
 
     const bookings = await prisma.booking.findMany({
       where: {
-        userId: session.user.id as string,
+        userId: user.id,
       },
       include: {
         items: {
@@ -44,14 +44,17 @@ export async function GET(request: NextRequest) {
 // POST /api/bookings - Create a new booking
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
+    const user = await getAuthenticatedUser(request)
 
-    if (!session || !session.user) {
+    if (!user) {
+      console.error('Booking POST: User not authenticated')
       return ApiErrors.UNAUTHORIZED('You must be logged in to create a booking')
     }
 
+    console.log('Booking POST: User authenticated', { userId: user.id, email: user.email })
+
     // Rate limiting
-    const identifier = session.user.id || getRateLimitIdentifier(request)
+    const identifier = user.id || getRateLimitIdentifier(request)
     const { success, reset } = await bookingRateLimit.limit(identifier)
     
     if (!success) {
@@ -140,15 +143,15 @@ export async function POST(request: NextRequest) {
     const totalAmount = tests.reduce((sum, test) => sum + test.price, 0)
 
     // Get user details for email
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id as string },
+    const userDetails = await prisma.user.findUnique({
+      where: { id: user.id },
       select: { name: true, email: true },
     })
 
     // Create booking with items
     const booking = await prisma.booking.create({
       data: {
-        userId: session.user.id as string,
+        userId: user.id,
         bookingType,
         patientName,
         patientAge,
@@ -180,12 +183,12 @@ export async function POST(request: NextRequest) {
     })
 
     // Send booking confirmation email (non-blocking)
-    if (user?.email) {
+    if (userDetails?.email) {
       try {
         const labName = await getLabName()
         const baseUrl = getEmailBaseUrl()
         const html = getBookingConfirmationTemplate({
-          name: user.name || 'User',
+          name: userDetails.name || 'User',
           bookingId: booking.id,
           bookingDate: booking.bookingDate?.toISOString() || null,
           bookingTime: booking.bookingTime,
@@ -200,7 +203,7 @@ export async function POST(request: NextRequest) {
         })
         
         await sendEmail({
-          to: user.email,
+          to: userDetails.email,
           subject: `Booking Confirmed - ${booking.id}`,
           html,
         })
@@ -210,8 +213,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log('Booking POST: Booking created successfully', { bookingId: booking.id })
     return createSuccessResponse(booking, 201, 'Booking created successfully')
   } catch (error) {
+    console.error('Booking POST: Error creating booking', error)
+    // Log full error details in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Full error:', error)
+    }
     return handleApiError(error)
   }
 }

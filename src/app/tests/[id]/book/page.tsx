@@ -99,6 +99,7 @@ export default function BookTestPage() {
       const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Ensure cookies are sent with the request
         body: JSON.stringify({
           ...formData,
           patientAge: parseInt(formData.patientAge),
@@ -107,16 +108,21 @@ export default function BookTestPage() {
         }),
       })
 
-      if (res.ok) {
-        const booking = await res.json()
-        router.push(`/bookings/${booking.id}`)
+      const data = await res.json()
+
+      if (res.ok && data.success) {
+        // API returns { success: true, data: booking }
+        router.push(`/bookings/${data.data.id}`)
       } else {
-        const error = await res.json()
-        alert(error.error || 'Failed to create booking')
+        // Handle error response
+        const errorMessage = data.message || data.error || 'Failed to create booking'
+        const errorDetails = data.details
+        console.error('Booking error:', errorMessage, errorDetails)
+        alert(errorMessage)
       }
     } catch (error) {
       console.error('Error creating booking:', error)
-      alert('Failed to create booking')
+      alert('Failed to create booking. Please try again.')
     } finally {
       setSubmitting(false)
     }
